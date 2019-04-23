@@ -1,0 +1,11 @@
+{
+	"name": "SqlDB",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"connectionString": "integrated security=False;encrypt=True;connection timeout=30;data source=SERVERNAME.database.windows.net;initial catalog=SQLDB;user id=sqladmin",
+			"encryptedCredential": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+		}
+	}
+}
