@@ -1,0 +1,29 @@
+{
+	"name": "dtstSqlDB",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "CoatsDB",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Table": {
+				"type": "String",
+				"defaultValue": "Pipeline().parameters.SourceTableName"
+			},
+			"Column": {
+				"type": "String",
+				"defaultValue": "Pipeline().parameters.ArchSourceTSField"
+			},
+			"Start": {
+				"type": "String",
+				"defaultValue": "Pipeline().parameters.StartDate"
+			},
+			"End": {
+				"type": "String",
+				"defaultValue": "Pipeline().parameters.EndDate"
+			}
+		},
+		"type": "AzureSqlTable"
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

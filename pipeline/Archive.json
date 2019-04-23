@@ -1,0 +1,100 @@
+{
+	"name": "Archive",
+	"properties": {
+		"activities": [
+			{
+				"name": "SQLDBtoABlob",
+				"type": "Copy",
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"typeProperties": {
+					"source": {
+						"type": "SqlSource",
+						"sqlReaderStoredProcedureName": "[dataArchival].[usp_getDatafrArchival]",
+						"storedProcedureParameters": {
+							"ArchSourceTSField": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.ArchSourceTSField",
+									"type": "Expression"
+								}
+							},
+							"EndDate": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.EndDate",
+									"type": "Expression"
+								}
+							},
+							"SourceTableName": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.SourceTableName",
+									"type": "Expression"
+								}
+							},
+							"StartDate": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.StartDate",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					"sink": {
+						"type": "BlobSink"
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "dtstSqlDB",
+						"type": "DatasetReference",
+						"parameters": {
+							"Table": "@pipeline().parameters.SourceTableName",
+							"Column": "@pipeline().parameters.SourceTableName",
+							"Start": "@pipeline().parameters.SourceTableName",
+							"End": "@pipeline().parameters.SourceTableName"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ArchBlobSqlDb",
+						"type": "DatasetReference",
+						"parameters": {
+							"path": {
+								"value": "@pipeline().parameters.ExportLocation",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"SourceTableName": {
+				"type": "String"
+			},
+			"ArchSourceTSField": {
+				"type": "String"
+			},
+			"StartDate": {
+				"type": "String"
+			},
+			"EndDate": {
+				"type": "String"
+			},
+			"ExportLocation": {
+				"type": "String"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,33 @@
+{
+	"name": "ArchBlobSqlDb",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ArchBlobStoreSqlDb",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"path": {
+				"type": "String"
+			}
+		},
+		"type": "AzureBlob",
+		"typeProperties": {
+			"format": {
+				"type": "TextFormat",
+				"columnDelimiter": ",",
+				"rowDelimiter": "\r",
+				"quoteChar": "\"",
+				"nullValue": "",
+				"treatEmptyAsNull": true,
+				"skipLineCount": 0,
+				"firstRowAsHeader": false
+			},
+			"fileName": "file.txt",
+			"folderPath": {
+				"value": "@concat('sqldb-archival/',dataset().path)",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
