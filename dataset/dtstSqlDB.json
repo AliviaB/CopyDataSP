@@ -2,7 +2,7 @@
 	"name": "dtstSqlDB",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "CoatsDB",
+			"referenceName": "SqlDB",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
