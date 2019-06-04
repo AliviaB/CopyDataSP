@@ -1,6 +1,7 @@
 {
 	"name": "Archive",
 	"properties": {
+		"description": "Test the process of deployment with CI/CD",
 		"activities": [
 			{
 				"name": "SQLDBtoABlob",
