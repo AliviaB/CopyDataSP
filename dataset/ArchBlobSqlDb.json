@@ -1,6 +1,7 @@
 {
 	"name": "ArchBlobSqlDb",
 	"properties": {
+		"description": "change cvbdfgdgd",
 		"linkedServiceName": {
 			"referenceName": "ArchBlobStoreSqlDb",
 			"type": "LinkedServiceReference"
