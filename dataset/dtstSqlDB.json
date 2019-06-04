@@ -1,6 +1,7 @@
 {
 	"name": "dtstSqlDB",
 	"properties": {
+		"description": "changed to publish",
 		"linkedServiceName": {
 			"referenceName": "SqlDB",
 			"type": "LinkedServiceReference"
