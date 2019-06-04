@@ -1,0 +1,242 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory Name",
+			"defaultValue": "Copy-data-Factory-Dev01"
+		},
+		"ArchBlobStoreSqlDb_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ArchBlobStoreSqlDb'"
+		},
+		"SqlDB_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'SqlDB'"
+		},
+		"ArchBlobSqlDb_properties_typeProperties_fileName": {
+			"type": "string",
+			"defaultValue": "file.txt"
+		},
+		"ArchBlobSqlDb_properties_typeProperties_folderPath": {
+			"type": "string",
+			"defaultValue": "@concat('sqldb-archival/',dataset().path)"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/ArchBlobStoreSqlDb')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('ArchBlobStoreSqlDb_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SqlDB')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('SqlDB_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ArchBlobSqlDb')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "change cvbdfgdgd",
+				"linkedServiceName": {
+					"referenceName": "ArchBlobStoreSqlDb",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"path": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureBlob",
+				"typeProperties": {
+					"format": {
+						"type": "TextFormat",
+						"columnDelimiter": ",",
+						"rowDelimiter": "\r",
+						"quoteChar": "\"",
+						"nullValue": "",
+						"treatEmptyAsNull": true,
+						"skipLineCount": 0,
+						"firstRowAsHeader": false
+					},
+					"fileName": "[parameters('ArchBlobSqlDb_properties_typeProperties_fileName')]",
+					"folderPath": {
+						"value": "[parameters('ArchBlobSqlDb_properties_typeProperties_folderPath')]",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ArchBlobStoreSqlDb')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dtstSqlDB')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "changed to publish",
+				"linkedServiceName": {
+					"referenceName": "SqlDB",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Table": {
+						"type": "String",
+						"defaultValue": "Pipeline().parameters.SourceTableName"
+					},
+					"Column": {
+						"type": "String",
+						"defaultValue": "Pipeline().parameters.ArchSourceTSField"
+					},
+					"Start": {
+						"type": "String",
+						"defaultValue": "Pipeline().parameters.StartDate"
+					},
+					"End": {
+						"type": "String",
+						"defaultValue": "Pipeline().parameters.EndDate"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/SqlDB')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Archive')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Test the process of deployment with CI/CD",
+				"activities": [
+					{
+						"name": "SQLDBtoABlob",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 3,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlSource",
+								"sqlReaderStoredProcedureName": "[[dataArchival].[usp_getDatafrArchival]",
+								"storedProcedureParameters": {
+									"ArchSourceTSField": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.ArchSourceTSField",
+											"type": "Expression"
+										}
+									},
+									"EndDate": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.EndDate",
+											"type": "Expression"
+										}
+									},
+									"SourceTableName": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.SourceTableName",
+											"type": "Expression"
+										}
+									},
+									"StartDate": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.StartDate",
+											"type": "Expression"
+										}
+									}
+								}
+							},
+							"sink": {
+								"type": "BlobSink"
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "dtstSqlDB",
+								"type": "DatasetReference",
+								"parameters": {
+									"Table": "@pipeline().parameters.SourceTableName",
+									"Column": "@pipeline().parameters.SourceTableName",
+									"Start": "@pipeline().parameters.SourceTableName",
+									"End": "@pipeline().parameters.SourceTableName"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "ArchBlobSqlDb",
+								"type": "DatasetReference",
+								"parameters": {
+									"path": {
+										"value": "@pipeline().parameters.ExportLocation",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"parameters": {
+					"SourceTableName": {
+						"type": "String"
+					},
+					"ArchSourceTSField": {
+						"type": "String"
+					},
+					"StartDate": {
+						"type": "String"
+					},
+					"EndDate": {
+						"type": "String"
+					},
+					"ExportLocation": {
+						"type": "String"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/dtstSqlDB')]",
+				"[concat(variables('factoryId'), '/datasets/ArchBlobSqlDb')]"
+			]
+		}
+	]
+}
